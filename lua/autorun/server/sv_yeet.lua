@@ -130,7 +130,7 @@ local function playerDrop( ply, ent )
         ent:SetMoveType( MOVETYPE_WALK )
         ent:SetVelocity( ent.cfcYeetSpeed * 50 )
 
-        local access = ULib.ucl.query( ply, "physgunragdollplayer" )
+        local access = ULib.ucl.query( ply, "ulx physgunragdollplayer" )
         if not access then return end
 
         local x = math.abs( ent.cfcYeetSpeed.x )
