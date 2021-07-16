@@ -96,7 +96,7 @@ end
 
 
 local function playerPickup( ply, ent )
-    local access, tag = ULib.ucl.query( ply, "physgunplayer" )
+    local access, tag = ULib.ucl.query( ply, "ulx physgunplayer" )
     if ent:IsPlayer() and ULib.isSandbox() and access and not ent.NoNoclip and not ent.frozen and ply:GetInfoNum( "cl_pickupplayers", 1 ) == 1 then
         -- Extra restrictions! UCL wasn't designed to handle this sort of thing so we're putting it in by hand...
         local restrictions = {}
