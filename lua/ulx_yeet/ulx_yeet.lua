@@ -1,4 +1,7 @@
-ULib.ucl.registerAccess( "ulx physgunragdollplayer", ULib.ACCESS_ADMIN, "Ability to physgun ragdoll other players.", "Other" )
+if SERVER then
+    ULib.ucl.registerAccess( "ulx physgunragdollplayer", ULib.ACCESS_ADMIN, "Ability to physgun ragdoll other players.", "Other" )
+end
+
 CreateConVar( "ulx_physgun_ragdoll_velocity", 75, { FCVAR_REPLICATED, FCVAR_ARCHIVE }, "The velocity required for a physgunned player to turn into a ragdoll on release.", 0 )
 
 local function savePlayer( ply )
@@ -60,7 +63,7 @@ local function unRagdollPlayer( ragdoll )
     ragdoll:Remove()
 end
 
-local function ragdollPlayer( ply )
+local function ragdollPlayer( ply, velocity )
     savePlayer( ply )
 
     local ragdoll = ents.Create( "prop_ragdoll" )
@@ -69,11 +72,10 @@ local function ragdollPlayer( ply )
     ragdoll:SetModel( ply:GetModel() )
     ragdoll:SetPos( ply:GetPos() )
     ragdoll:SetAngles( ply:GetAngles() )
-    ragdoll:SetVelocity( ply:GetVelocity() )
+    ragdoll:SetVelocity( velocity )
     ragdoll:Spawn()
 
     local boneCount = ragdoll:GetPhysicsObjectCount() - 1
-    local velocity = ply:GetVelocity()
 
     for i = 0, boneCount do
         local bonePhys = ragdoll:GetPhysicsObjectNum( i )
@@ -98,74 +100,77 @@ end
 local function playerPickup( ply, ent )
     local access, tag = ULib.ucl.query( ply, "ulx physgunplayer" )
     if ent:IsPlayer() and ULib.isSandbox() and access and not ent.NoNoclip and not ent.frozen and ply:GetInfoNum( "cl_pickupplayers", 1 ) == 1 then
-        -- Extra restrictions! UCL wasn't designed to handle this sort of thing so we're putting it in by hand...
+
         local restrictions = {}
         ULib.cmds.PlayerArg.processRestrictions( restrictions, ply, {}, tag and ULib.splitArgs( tag )[ 1 ] )
         if restrictions.restrictedTargets == false or (restrictions.restrictedTargets and not table.HasValue( restrictions.restrictedTargets, ent )) then
             return
         end
 
+        if CLIENT then return true end
+
         ent:SetMoveType( MOVETYPE_NONE )
         local newPos = ent:GetPos()
         local oldPos = ent:GetPos()
         local steamId = ent:SteamID64()
+
         hook.Add( "Tick", "CFC_Yeet_Tick_Holding" .. steamId, function()
             if not IsValid( ent ) then
                 hook.Remove( "Tick", "CFC_Yeet_Tick_Holding" .. steamId )
                 return
             end
+
             newPos = ent:GetPos()
             ent.cfcYeetSpeed = newPos - oldPos
             oldPos = ent:GetPos()
         end)
+
         return true
     end
 end
 hook.Add( "PhysgunPickup", "ulxPlayerPickup", playerPickup, HOOK_HIGH )
 
+if CLIENT then return end
+
 local function playerDrop( ply, ent )
     if not ent:IsPlayer() then return end
+
     hook.Remove( "Tick", "CFC_Yeet_Tick_Holding" .. ent:SteamID64() )
-    if ent:GetClass() == "player" then
-        ent:SetMoveType( MOVETYPE_WALK )
-        ent:SetVelocity( ent.cfcYeetSpeed * 50 )
 
-        local access = ULib.ucl.query( ply, "ulx physgunragdollplayer" )
-        if not access then return end
+    ent:SetMoveType( MOVETYPE_WALK )
+    ent:SetVelocity( ent.cfcYeetSpeed * 50 )
 
-        local x = math.abs( ent.cfcYeetSpeed.x )
-        local y = math.abs( ent.cfcYeetSpeed.y )
-        local z = math.abs( ent.cfcYeetSpeed.z )
+    local access = ULib.ucl.query( ply, "ulx physgunragdollplayer" )
+    if not access then return end
 
-        local speed = x + y + z
-        local speedLimit = GetConVar( "ulx_physgun_ragdoll_velocity" ):GetInt()
+    local speedLimit = GetConVar( "ulx_physgun_ragdoll_velocity" ):GetInt()
 
-        if speed < speedLimit then return end
+    if ent.cfcYeetSpeed:Length() < speedLimit then return end
 
-        timer.Simple( 0, function()
-            local ragdoll = ragdollPlayer( ent )
-            ragdoll.player = ent
+    timer.Simple( 0, function()
+        local ragdoll = ragdollPlayer( ent, ent.cfcYeetSpeed * 50 )
+        ragdoll.player = ent
+        ragdoll.cooldown = CurTime() + 1
 
-            timer.Simple( 30, function()
-                if IsValid( ragdoll ) then
-                    unRagdollPlayer( ragdoll )
-                end
-            end)
-
-            local steamId = ent:SteamID64()
-            hook.Add( "Tick", "CFC_Yeet_Tick_Ragdoll" .. steamId, function()
-                if not IsValid( ragdoll ) then
-                    hook.Remove( "Tick", "CFC_Yeet_Tick_Ragdoll" .. steamId )
-                    ent:Spawn()
-                    return
-                end
-
-                if ragdoll:GetVelocity() ~= Vector( 0, 0, 0 ) then return end
+        timer.Simple( 30, function()
+            if IsValid( ragdoll ) then
                 unRagdollPlayer( ragdoll )
-                hook.Remove( "Tick", "CFC_Yeet_Tick_Ragdoll" .. steamId )
-            end)
+            end
         end)
-    end
+
+        local steamId = ent:SteamID64()
+        hook.Add( "Tick", "CFC_Yeet_Tick_Ragdoll" .. steamId, function()
+            if not IsValid( ragdoll ) then
+                hook.Remove( "Tick", "CFC_Yeet_Tick_Ragdoll" .. steamId )
+                ent:Spawn()
+                return
+            end
+
+            if ragdoll:GetVelocity():Length() > 10 or ragdoll.cooldown > CurTime() then return end
+            unRagdollPlayer( ragdoll )
+            hook.Remove( "Tick", "CFC_Yeet_Tick_Ragdoll" .. steamId )
+        end)
+    end)
 end
 
 hook.Add( "PhysgunDrop", "ulxPlayerDrop", playerDrop )
