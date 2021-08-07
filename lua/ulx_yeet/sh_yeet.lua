@@ -100,9 +100,8 @@ end
 local function playerPickup( ply, ent )
     local access, tag = ULib.ucl.query( ply, "ulx physgunplayer" )
     if ent:IsPlayer() and ULib.isSandbox() and access and not ent.NoNoclip and not ent.frozen and ply:GetInfoNum( "cl_pickupplayers", 1 ) == 1 then
-
         local restrictions = {}
-        ULib.cmds.PlayerArg.processRestrictions( restrictions, ply, {}, tag and ULib.splitArgs( tag )[ 1 ] )
+        ULib.cmds.PlayerArg.processRestrictions( restrictions, ply, {}, tag and ULib.splitArgs( tag )[1] )
         if restrictions.restrictedTargets == false or (restrictions.restrictedTargets and not table.HasValue( restrictions.restrictedTargets, ent )) then
             return
         end
@@ -114,7 +113,7 @@ local function playerPickup( ply, ent )
         local oldPos = ent:GetPos()
         local steamId = ent:SteamID64()
 
-        hook.Add( "Tick", "CFC_Yeet_Tick_Holding" .. steamId, function()
+        hook.Add( "Tick", "CFC_Yeet_TickHolding_" .. steamId, function()
             if not IsValid( ent ) then
                 hook.Remove( "Tick", "CFC_Yeet_Tick_Holding" .. steamId )
                 return
