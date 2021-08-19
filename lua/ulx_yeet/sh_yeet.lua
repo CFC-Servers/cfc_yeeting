@@ -1,14 +1,14 @@
 if SERVER then
-    ULib.ucl.registerAccess( "ulx physgunragdollplayer", ULib.ACCESS_ADMIN, "Ability to physgun ragdoll other players.", "Other" )
+    ULib.ucl.registerAccess( "physgunragdollplayer", ULib.ACCESS_ADMIN, "Ability to physgun ragdoll other players.", "Other" )
 end
 
-CreateConVar( "ulx_physgun_ragdoll_velocity", 75, { FCVAR_REPLICATED, FCVAR_ARCHIVE }, "The velocity required for a physgunned player to turn into a ragdoll on release.", 0 )
+CreateConVar( "ulx_physgun_ragdoll_velocity", 150, { FCVAR_REPLICATED, FCVAR_ARCHIVE }, "The velocity required for a physgunned player to turn into a ragdoll on release.", 0 )
 
 local function savePlayer( ply )
-    local result = {}
-
-    result.health = ply:Health()
-    result.armor = ply:Armor()
+    local result = {
+        health = ply:Health(),
+        armor = ply:Armor()
+    }
 
     if ply:GetActiveWeapon():IsValid() then
         result.currentWeapon = ply:GetActiveWeapon():GetClass()
@@ -19,11 +19,12 @@ local function savePlayer( ply )
     for _, weapon in ipairs( weapons ) do
         result.weapondata = {}
         printname = weapon:GetClass()
-        result.weapondata[ printname ] = {}
-        result.weapondata[ printname ].clip1 = weapon:Clip1()
-        result.weapondata[ printname ].clip2 = weapon:Clip2()
-        result.weapondata[ printname ].ammo1 = ply:GetAmmoCount( weapon:GetPrimaryAmmoType() )
-        result.weapondata[ printname ].ammo2 = ply:GetAmmoCount( weapon:GetSecondaryAmmoType() )
+        result.weapondata[ printname ] = {
+            clip1 = weapon:Clip1(),
+            clip2 = weapon:Clip2(),
+            ammo1 = ply:GetAmmoCount( weapon:GetPrimaryAmmoType() ),
+            ammo2 = ply:GetAmmoCount( weapon:GetSecondaryAmmoType() )
+        }
     end
     ply.cfcYeetData = result
 end
@@ -34,27 +35,26 @@ local function restorePlayer( ply )
     ply:SetHealth( data.health )
     ply:SetArmor( data.armor )
 
-    for weaponClass, infoTable in pairs( data.weapondata ) do
+    for weaponClass, weaponInfo in pairs( data.weapondata ) do
         ply:Give( weaponClass )
         local weapon = ply:GetWeapon( weaponClass )
-        weapon:SetClip1( infoTable.clip1 )
-        weapon:SetClip2( infoTable.clip2 )
-        ply:SetAmmo( infoTable.ammo1, weapon:GetPrimaryAmmoType() )
-        ply:SetAmmo( infoTable.ammo2, weapon:GetSecondaryAmmoType() )
+        weapon:SetClip1( weaponInfo.clip1 )
+        weapon:SetClip2( weaponInfo.clip2 )
+        ply:SetAmmo( weaponInfo.ammo1, weapon:GetPrimaryAmmoType() )
+        ply:SetAmmo( weaponInfo.ammo2, weapon:GetSecondaryAmmoType() )
     end
 
     ply:SelectWeapon( data.currentWeapon )
 end
 
 local function unRagdollPlayer( ragdoll )
+    if not IsValid( ragdoll ) then return end
     local ply = ragdoll.player
     if not IsValid( ply ) then return end
     ply:SetParent()
     ply:UnSpectate()
     ply:Spawn()
     restorePlayer( ply )
-
-    if not IsValid( ragdoll ) then return end
 
     ply:SetPos( ragdoll:GetPos() )
     ply:SetVelocity( ragdoll:GetVelocity() )
@@ -139,7 +139,7 @@ local function playerDrop( ply, ent )
     ent:SetMoveType( MOVETYPE_WALK )
     ent:SetVelocity( ent.cfcYeetSpeed * 50 )
 
-    local access = ULib.ucl.query( ply, "ulx physgunragdollplayer" )
+    local access = ULib.ucl.query( ply, "physgunragdollplayer" )
     if not access then return end
 
     local speedLimit = GetConVar( "ulx_physgun_ragdoll_velocity" ):GetInt()
@@ -152,9 +152,7 @@ local function playerDrop( ply, ent )
         ragdoll.cooldown = CurTime() + 1
 
         timer.Simple( 30, function()
-            if IsValid( ragdoll ) then
-                unRagdollPlayer( ragdoll )
-            end
+            unRagdollPlayer( ragdoll )
         end)
 
         local steamId = ent:SteamID64()
