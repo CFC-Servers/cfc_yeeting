@@ -2,7 +2,11 @@ if SERVER then
     ULib.ucl.registerAccess( "physgunragdollplayer", ULib.ACCESS_ADMIN, "Ability to physgun ragdoll other players.", "Other" )
 end
 
-local ragdollVelocity = CreateConVar( "ulx_physgun_ragdoll_velocity", 150, { FCVAR_REPLICATED, FCVAR_ARCHIVE }, "The velocity required for a physgunned player to turn into a ragdoll on release.", 0 )
+local ragdollVelocity = CreateConVar( "ulx_physgun_ragdoll_velocity", 50, { FCVAR_REPLICATED, FCVAR_ARCHIVE }, "The velocity required for a physgunned player to turn into a ragdoll on release.", 0 ):GetInt()
+
+cvars.AddChangeCallback( "ulx_physgun_ragdoll_velocity", function( _, _, val )
+    ragdollVelocity = tonumber( val )
+end)
 
 local function savePlayer( ply )
     local result = {
@@ -110,10 +114,12 @@ local function playerPickup( ply, ent )
     if not access then return end
 
     local restrictions = {}
-    ULib.cmds.PlayerArg.processRestrictions( restrictions, ply, {}, tag and ULib.splitArgs( tag )[1] )
 
-    if restrictions.restrictedTargets == false then return end
-    if not table.HasValue( restrictions.restrictedTargets, ent ) ) then return end
+    ULib.cmds.PlayerArg.processRestrictions( restrictions, ply, {}, tag and ULib.splitArgs( tag )[ 1 ] )
+
+    if restrictions.restrictedTargets == false or (restrictions.restrictedTargets and not table.HasValue( restrictions.restrictedTargets, ent )) then
+        return
+    end
 
     if CLIENT then return true end
 
@@ -145,21 +151,21 @@ if CLIENT then return end
 local function playerDrop( ply, ent )
     if not ent:IsPlayer() then return end
 
-    hook.Remove( "Tick", "CFC_Yeet_Tick_Holding" .. ent:SteamID64() )
+    hook.Remove( "Tick", "CFC_Yeet_TickHolding_" .. ent:SteamID64() )
 
-    local newVelocity = ent.cfcYeetSpeed * 50
+    local newVelocity = ent.cfcYeetSpeed
     ent:SetMoveType( MOVETYPE_WALK )
-    ent:SetVelocity( newVelocity )
+    ent:SetVelocity( newVelocity * 50 )
 
     local access = ULib.ucl.query( ply, "physgunragdollplayer" )
     if not access then return end
 
-    if ent.cfcYeetSpeed:Length() < ragdollVelocity then return end
+    if newVelocity:Length() < ragdollVelocity then return end
 
     timer.Simple( 0, function()
         if not IsValid( ent ) then return end
 
-        local ragdoll = ragdollPlayer( ent, newVelocity )
+        local ragdoll = ragdollPlayer( ent, newVelocity * 50 )
         ragdoll.player = ent
         ragdoll.cooldown = CurTime() + 1
 
@@ -171,17 +177,14 @@ local function playerDrop( ply, ent )
         local hookName = "CFC_Yeet_RagdollTick_" .. steamId
 
         hook.Add( "Tick", hookName, function()
-            hook.Remove( "Tick", hookName )
-
             if not IsValid( ragdoll ) then
+                hook.Remove( "Tick", hookName )
                 ent:Spawn()
                 return
             end
-
-            if ragdoll:GetVelocity():Length() > 10 then return end
-            if ragdoll.cooldown > CurTime() then return end
-
+            if ragdoll:GetVelocity():Length() > 10 or ragdoll.cooldown > CurTime() then return end
             unRagdollPlayer( ragdoll )
+            hook.Remove( "Tick", hookName )
         end)
     end)
 end
