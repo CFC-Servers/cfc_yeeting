@@ -2,7 +2,7 @@ if SERVER then
     ULib.ucl.registerAccess( "physgunragdollplayer", ULib.ACCESS_ADMIN, "Ability to physgun ragdoll other players.", "Other" )
 end
 
-CreateConVar( "ulx_physgun_ragdoll_velocity", 150, { FCVAR_REPLICATED, FCVAR_ARCHIVE }, "The velocity required for a physgunned player to turn into a ragdoll on release.", 0 )
+local ragdollVelocity = CreateConVar( "ulx_physgun_ragdoll_velocity", 150, { FCVAR_REPLICATED, FCVAR_ARCHIVE }, "The velocity required for a physgunned player to turn into a ragdoll on release.", 0 )
 
 local function savePlayer( ply )
     local result = {
@@ -26,6 +26,7 @@ local function savePlayer( ply )
             ammo2 = ply:GetAmmoCount( weapon:GetSecondaryAmmoType() )
         }
     end
+
     ply.cfcYeetData = result
 end
 
@@ -67,7 +68,6 @@ local function ragdollPlayer( ply, velocity )
     savePlayer( ply )
 
     local ragdoll = ents.Create( "prop_ragdoll" )
-    if not IsValid( ragdoll ) then return end
 
     ragdoll:SetModel( ply:GetModel() )
     ragdoll:SetPos( ply:GetPos() )
@@ -142,9 +142,7 @@ local function playerDrop( ply, ent )
     local access = ULib.ucl.query( ply, "physgunragdollplayer" )
     if not access then return end
 
-    local speedLimit = GetConVar( "ulx_physgun_ragdoll_velocity" ):GetInt()
-
-    if ent.cfcYeetSpeed:Length() < speedLimit then return end
+    if ent.cfcYeetSpeed:Length() < ragdollVelocity then return end
 
     timer.Simple( 0, function()
         local ragdoll = ragdollPlayer( ent, ent.cfcYeetSpeed * 50 )
