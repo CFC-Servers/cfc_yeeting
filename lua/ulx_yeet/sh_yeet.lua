@@ -17,9 +17,8 @@ local function savePlayer( ply )
     local weapons = ply:GetWeapons()
 
     for _, weapon in ipairs( weapons ) do
-        result.weapondata = {}
-        printname = weapon:GetClass()
-        result.weapondata[ printname ] = {
+        local className = weapon:GetClass()
+        result.weaponData[className] = {
             clip1 = weapon:Clip1(),
             clip2 = weapon:Clip2(),
             ammo1 = ply:GetAmmoCount( weapon:GetPrimaryAmmoType() ),
