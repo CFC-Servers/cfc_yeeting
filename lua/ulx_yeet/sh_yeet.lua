@@ -7,7 +7,8 @@ local ragdollVelocity = CreateConVar( "ulx_physgun_ragdoll_velocity", 150, { FCV
 local function savePlayer( ply )
     local result = {
         health = ply:Health(),
-        armor = ply:Armor()
+        armor = ply:Armor(),
+        weaponData = {}
     }
 
     if ply:GetActiveWeapon():IsValid() then
