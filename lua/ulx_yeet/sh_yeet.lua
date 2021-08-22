@@ -79,8 +79,10 @@ local function ragdollPlayer( ply, velocity )
 
     for i = 0, boneCount do
         local bonePhys = ragdoll:GetPhysicsObjectNum( i )
+
         if IsValid( bonePhys ) then
             local boneVec, boneAng = ply:GetBonePosition( ragdoll:TranslatePhysBoneToBone( i ) )
+
             if boneVec and boneAng then
                 bonePhys:SetPos( boneVec )
                 bonePhys:SetAngles( boneAng )
@@ -145,8 +147,9 @@ local function playerDrop( ply, ent )
 
     hook.Remove( "Tick", "CFC_Yeet_Tick_Holding" .. ent:SteamID64() )
 
+    local newVelocity = ent.cfcYeetSpeed * 50
     ent:SetMoveType( MOVETYPE_WALK )
-    ent:SetVelocity( ent.cfcYeetSpeed * 50 )
+    ent:SetVelocity( newVelocity )
 
     local access = ULib.ucl.query( ply, "physgunragdollplayer" )
     if not access then return end
@@ -154,7 +157,9 @@ local function playerDrop( ply, ent )
     if ent.cfcYeetSpeed:Length() < ragdollVelocity then return end
 
     timer.Simple( 0, function()
-        local ragdoll = ragdollPlayer( ent, ent.cfcYeetSpeed * 50 )
+        if not IsValid( ent ) then return end
+
+        local ragdoll = ragdollPlayer( ent, newVelocity )
         ragdoll.player = ent
         ragdoll.cooldown = CurTime() + 1
 
@@ -163,16 +168,20 @@ local function playerDrop( ply, ent )
         end)
 
         local steamId = ent:SteamID64()
-        hook.Add( "Tick", "CFC_Yeet_Tick_Ragdoll" .. steamId, function()
+        local hookName = "CFC_Yeet_RagdollTick_" .. steamId
+
+        hook.Add( "Tick", hookName, function()
+            hook.Remove( "Tick", hookName )
+
             if not IsValid( ragdoll ) then
-                hook.Remove( "Tick", "CFC_Yeet_Tick_Ragdoll" .. steamId )
                 ent:Spawn()
                 return
             end
 
-            if ragdoll:GetVelocity():Length() > 10 or ragdoll.cooldown > CurTime() then return end
+            if ragdoll:GetVelocity():Length() > 10 then return end
+            if ragdoll.cooldown > CurTime() then return end
+
             unRagdollPlayer( ragdoll )
-            hook.Remove( "Tick", "CFC_Yeet_Tick_Ragdoll" .. steamId )
         end)
     end)
 end
