@@ -36,7 +36,7 @@ local function restorePlayer( ply )
     ply:SetHealth( data.health )
     ply:SetArmor( data.armor )
 
-    for weaponClass, weaponInfo in pairs( data.weapondata ) do
+    for weaponClass, weaponInfo in pairs( data.weaponData ) do
         ply:Give( weaponClass )
         local weapon = ply:GetWeapon( weaponClass )
         weapon:SetClip1( weaponInfo.clip1 )
