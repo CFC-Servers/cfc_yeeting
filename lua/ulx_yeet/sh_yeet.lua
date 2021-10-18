@@ -138,18 +138,14 @@ local function playerPickup( ply, ent )
 
         newPos = ent:GetPos()
 
-		local tempSpeed = newPos - oldPos
-		
-		print( tempSpeed:LengthSqr() )
-		
-		if tempSpeed:LengthSqr() > 1 then
-			print( "temp speed", tempSpeed )
-			
-			speedVec = tempSpeed
-		end
+        local tempSpeed = newPos - oldPos
 
-	    ent.cfcYeetSpeed = speedVec--newPos - oldPos
-	    oldPos = newPos
+        if tempSpeed:LengthSqr() > 1 then
+            speedVec = tempSpeed
+        end
+
+        ent.cfcYeetSpeed = speedVec--newPos - oldPos
+        oldPos = newPos
     end)
 
     return true
