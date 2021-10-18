@@ -125,9 +125,9 @@ local function playerPickup( ply, ent )
 
     ent:SetMoveType( MOVETYPE_NONE )
 
-    local curPos
     local newPos = ent:GetPos()
     local oldPos = ent:GetPos()
+    local speedVec = vector_origin
     local steamId = ent:SteamID64()
 
     hook.Add( "Tick", "CFC_Yeet_TickHolding_" .. steamId, function()
@@ -136,10 +136,20 @@ local function playerPickup( ply, ent )
             return
         end
 
-        curPos = ent:GetPos()
-        newPos = curPos
-        ent.cfcYeetSpeed = newPos - oldPos
-        oldPos = curPos
+        newPos = ent:GetPos()
+
+		local tempSpeed = newPos - oldPos
+		
+		print( tempSpeed:LengthSqr() )
+		
+		if tempSpeed:LengthSqr() > 1 then
+			print( "temp speed", tempSpeed )
+			
+			speedVec = tempSpeed
+		end
+
+	    ent.cfcYeetSpeed = speedVec--newPos - oldPos
+	    oldPos = newPos
     end)
 
     return true
