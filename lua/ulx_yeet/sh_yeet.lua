@@ -110,7 +110,7 @@ local function playerPickup( ply, ent )
     if ent.frozen then return end
     if ply:GetInfoNum( "cl_pickupplayers", 1 ) ~= 1 then return end
 
-    local access, tag = ULib.ucl.query( ply, "physgunplayer" )
+    local access, tag = ULib.ucl.query( ply, "ulx physgunplayer" )
     if not access then return end
 
     local restrictions = {}
