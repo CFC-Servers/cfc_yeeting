@@ -144,7 +144,7 @@ local function playerPickup( ply, ent )
             speedVec = tempSpeed
         end
 
-        ent.cfcYeetSpeed = speedVec--newPos - oldPos
+        ent.cfcYeetSpeed = speedVec -- newPos - oldPos
         oldPos = newPos
     end)
 
