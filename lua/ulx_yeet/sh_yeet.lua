@@ -66,6 +66,8 @@ local function unRagdollPlayer( ragdoll )
     local yaw = ragdoll:GetAngles().yaw
     ply:SetAngles( Angle( 0, yaw, 0 ) )
     ragdoll:Remove()
+    ulx.clearExclusive( ply )
+    ply.yeetRagdoll = nil
 end
 
 local function ragdollPlayer( ply, velocity )
@@ -94,6 +96,9 @@ local function ragdollPlayer( ply, velocity )
             bonePhys:SetVelocity( velocity )
         end
     end
+
+    ulx.setExclusive( ply, "ragdolled" )
+    ply.yeetRagdoll = true
 
     ply:Spectate( OBS_MODE_CHASE )
     ply:SpectateEntity( ragdoll )
@@ -193,7 +198,7 @@ local function playerDrop( ply, ent )
                 ent:Spawn()
                 return
             end
-            if ragdoll:GetVelocity():Length() > 10 or ragdoll.cooldown > CurTime() then return end
+            if ragdoll:GetVelocity():Length() > 0.5 or ragdoll.cooldown > CurTime() then return end
             unRagdollPlayer( ragdoll )
             hook.Remove( "Tick", hookName )
         end)
@@ -201,3 +206,7 @@ local function playerDrop( ply, ent )
 end
 
 hook.Add( "PhysgunDrop", "ulxPlayerDrop", playerDrop )
+
+hook.Add( "CanPlayerSuicide", "ulxYeetCanSuicideCheck", function( ply )
+    return not ply.yeetRagdoll
+end)
