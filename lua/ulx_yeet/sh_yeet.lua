@@ -183,6 +183,11 @@ local function playerDrop( ply, ent )
         local hookName = "CFC_Yeet_RagdollTick_" .. steamId
 
         hook.Add( "Tick", hookName, function()
+            if not IsValid( ragdoll.player ) then
+                ragdoll:Remove()
+                hook.Remove( "Tick", hookName )
+            end
+
             if not IsValid( ragdoll ) then
                 hook.Remove( "Tick", hookName )
                 ent:Spawn()
