@@ -169,6 +169,7 @@ local function playerDrop( ply, ent )
     ent:SetMoveType( MOVETYPE_WALK )
     ent:SetVelocity( newVelocity * 50 )
 
+    if not ent:Alive() or ent.ragdoll then return end
     local access = ULib.ucl.query( ply, "physgunragdollplayer" )
     if not access then return end
 
@@ -193,6 +194,7 @@ local function playerDrop( ply, ent )
             if not IsValid( ragdoll ) then
                 hook.Remove( "Tick", hookName )
                 ent:Spawn()
+                ent.yeetRagdoll = nil
                 return
             end
 
