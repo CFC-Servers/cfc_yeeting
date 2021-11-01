@@ -2,7 +2,7 @@ if SERVER then
     ULib.ucl.registerAccess( "physgunragdollplayer", ULib.ACCESS_ADMIN, "Ability to physgun ragdoll other players.", "Other" )
 end
 
-local ragdollVelocity = CreateConVar( "ulx_physgun_ragdoll_velocity", 50, { FCVAR_REPLICATED, FCVAR_ARCHIVE }, "The velocity required for a physgunned player to turn into a ragdoll on release.", 0 ):GetInt()
+local ragdollVelocity = CreateConVar( "ulx_physgun_ragdoll_velocity", 40, { FCVAR_REPLICATED, FCVAR_ARCHIVE }, "The velocity required for a physgunned player to turn into a ragdoll on release.", 0 ):GetInt()
 
 cvars.AddChangeCallback( "ulx_physgun_ragdoll_velocity", function( _, _, val )
     ragdollVelocity = tonumber( val )
