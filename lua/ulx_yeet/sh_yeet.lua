@@ -71,6 +71,7 @@ local function unRagdollPlayer( ragdoll )
 end
 
 local function ragdollPlayer( ply, velocity )
+    if ply.yeetRagdoll then return end
     savePlayer( ply )
 
     local ragdoll = ents.Create( "prop_ragdoll" )
@@ -177,6 +178,7 @@ local function playerDrop( ply, ent )
         if not IsValid( ent ) then return end
 
         local ragdoll = ragdollPlayer( ent, newVelocity * 50 )
+        if not IsValid( ragdoll ) then return end
         ragdoll.player = ent
         ragdoll.cooldown = CurTime() + 1
 
