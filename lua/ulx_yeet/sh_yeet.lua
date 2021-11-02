@@ -204,7 +204,8 @@ local function playerDrop( ply, ent )
                 hook.Remove( "Tick", hookName )
             end
 
-            if ragdoll:GetVelocity():Length() > 0.5 or ragdoll.cooldown > CurTime() then return end
+            if ragdoll.cooldown > CurTime() then return end
+            if ragdoll:GetVelocity():Length() > 0.5 then return end
             unRagdollPlayer( ragdoll )
             hook.Remove( "Tick", hookName )
         end)
