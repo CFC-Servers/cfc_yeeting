@@ -3,7 +3,7 @@ if SERVER then
 end
 
 local ragdollVelocity = CreateConVar( "ulx_physgun_ragdoll_velocity", 40, { FCVAR_REPLICATED, FCVAR_ARCHIVE }, "The velocity required for a physgunned player to turn into a ragdoll on release.", 0 ):GetInt()
-
+local unragdollVelocity = 0.5 --Increasing this will make players unragdoll too early or create a very fast 
 cvars.AddChangeCallback( "ulx_physgun_ragdoll_velocity", function( _, _, val )
     ragdollVelocity = tonumber( val )
 end)
@@ -205,7 +205,7 @@ local function playerDrop( ply, ent )
             end
 
             if ragdoll.cooldown > CurTime() then return end
-            if ragdoll:GetVelocity():Length() > 0.5 then return end
+            if ragdoll:GetVelocity():Length() > unragdollVelocity then return end
             unRagdollPlayer( ragdoll )
             hook.Remove( "Tick", hookName )
         end)
