@@ -169,7 +169,8 @@ local function playerDrop( ply, ent )
     ent:SetMoveType( MOVETYPE_WALK )
     ent:SetVelocity( newVelocity * 50 )
 
-    if not ent:Alive() or ent.ragdoll then return end
+    if not ent:Alive() then return end
+    if ent.ragdoll then return end
     local access = ULib.ucl.query( ply, "physgunragdollplayer" )
     if not access then return end
 
@@ -213,5 +214,5 @@ end
 hook.Add( "PhysgunDrop", "ulxPlayerDrop", playerDrop )
 
 hook.Add( "CanPlayerSuicide", "ulxYeetCanSuicideCheck", function( ply )
-    return not ply.yeetRagdoll
+    if ply.yeetRagdoll then return false end
 end)
