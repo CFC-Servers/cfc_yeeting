@@ -11,7 +11,7 @@ end)
 local ragdollMaxTime = CreateConVar( "ulx_physgun_ragdoll_maxtime", 30, { FCVAR_REPLICATED, FCVAR_ARCHIVE }, "The maximum time a player can be ragdolled for.", 0 ):GetInt()
 cvars.AddChangeCallback( "ulx_physgun_ragdoll_maxtime", function( _, _, val )
     ragdollMaxTime = tonumber( val )
-end)
+end )
 
 local function savePlayer( ply )
     local result = {
