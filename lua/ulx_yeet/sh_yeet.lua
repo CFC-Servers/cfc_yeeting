@@ -8,6 +8,11 @@ cvars.AddChangeCallback( "ulx_physgun_ragdoll_velocity", function( _, _, val )
     ragdollVelocity = tonumber( val )
 end)
 
+local ragdollMaxTime = CreateConVar( "ulx_physgun_ragdoll_maxtime", 30, { FCVAR_REPLICATED, FCVAR_ARCHIVE }, "The maximum time a player can be ragdolled for.", 0 ):GetInt()
+cvars.AddChangeCallback( "ulx_physgun_ragdoll_maxtime", function( _, _, val )
+    ragdollMaxTime = tonumber( val )
+end)
+
 local function savePlayer( ply )
     local result = {
         health = ply:Health(),
@@ -184,7 +189,7 @@ local function playerDrop( ply, ent )
         ragdoll.player = ent
         ragdoll.cooldown = CurTime() + 1
 
-        timer.Simple( 30, function()
+        timer.Simple( ragdollMaxTime, function()
             unRagdollPlayer( ragdoll )
         end)
 
