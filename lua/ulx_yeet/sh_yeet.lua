@@ -49,6 +49,7 @@ local function restorePlayer( ply )
         ply:SetAmmo( weaponInfo.ammo2, weapon:GetSecondaryAmmoType() )
     end
 
+    if not data.currentWeapon then return end
     ply:SelectWeapon( data.currentWeapon )
 end
 
@@ -202,12 +203,13 @@ local function playerDrop( ply, ent )
             if not IsValid( ragdoll.player ) then
                 ragdoll:Remove()
                 hook.Remove( "Tick", hookName )
+                return
             end
 
             if ragdoll.cooldown > CurTime() then return end
             if ragdoll:GetVelocity():Length() > unragdollVelocity then return end
-            unRagdollPlayer( ragdoll )
             hook.Remove( "Tick", hookName )
+            unRagdollPlayer( ragdoll )
         end)
     end)
 end
