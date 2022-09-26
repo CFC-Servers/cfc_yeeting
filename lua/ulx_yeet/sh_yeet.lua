@@ -6,7 +6,7 @@ local ragdollVelocity = CreateConVar( "ulx_physgun_ragdoll_velocity", 40, { FCVA
 local unragdollVelocity = 0.5 --Increasing this will make players unragdoll too early or create a very fast 
 cvars.AddChangeCallback( "ulx_physgun_ragdoll_velocity", function( _, _, val )
     ragdollVelocity = tonumber( val )
-end)
+end )
 
 local ragdollMaxTime = CreateConVar( "ulx_physgun_ragdoll_maxtime", 30, { FCVAR_REPLICATED, FCVAR_ARCHIVE }, "The maximum time a player can be ragdolled for.", 0 ):GetInt()
 cvars.AddChangeCallback( "ulx_physgun_ragdoll_maxtime", function( _, _, val )
@@ -129,7 +129,7 @@ local function playerPickup( ply, ent )
 
     ULib.cmds.PlayerArg.processRestrictions( restrictions, ply, {}, tag and ULib.splitArgs( tag )[ 1 ] )
 
-    if restrictions.restrictedTargets == false or (restrictions.restrictedTargets and not table.HasValue( restrictions.restrictedTargets, ent )) then
+    if restrictions.restrictedTargets == false or ( restrictions.restrictedTargets and not table.HasValue( restrictions.restrictedTargets, ent ) ) then
         return
     end
 
@@ -158,7 +158,7 @@ local function playerPickup( ply, ent )
 
         ent.cfcYeetSpeed = speedVec -- newPos - oldPos
         oldPos = newPos
-    end)
+    end )
 
     return true
 end
@@ -192,7 +192,7 @@ local function playerDrop( ply, ent )
 
         timer.Simple( ragdollMaxTime, function()
             unRagdollPlayer( ragdoll )
-        end)
+        end )
 
         local steamId = ent:SteamID64()
         local hookName = "CFC_Yeet_RagdollTick_" .. steamId
@@ -215,12 +215,12 @@ local function playerDrop( ply, ent )
             if ragdoll:GetVelocity():Length() > unragdollVelocity then return end
             hook.Remove( "Tick", hookName )
             unRagdollPlayer( ragdoll )
-        end)
-    end)
+        end )
+    end )
 end
 
 hook.Add( "PhysgunDrop", "ulxPlayerDrop", playerDrop )
 
 hook.Add( "CanPlayerSuicide", "ulxYeetCanSuicideCheck", function( ply )
     if ply.yeetRagdoll then return false end
-end)
+end )
