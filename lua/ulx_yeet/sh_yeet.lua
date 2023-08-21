@@ -135,7 +135,7 @@ hook.Add( "CanPlayerSuicide", "ulxYeetCanSuicideCheck", function( ply )
     if ply.yeetRagdoll then return false end
 end )
 
-hook.Add( "KeyPress", "ulxPlayerPickupFreeze", function(ply, key )
+hook.Add( "KeyPress", "ulxPlayerPickupFreeze", function( ply, key )
     if key ~= IN_ATTACK2 then return end
     if ply:GetWeapon( "weapon_physgun" ) ~= ply:GetActiveWeapon() then return end
     if ply:GetInfoNum( "cl_physgunfreezeplayers", 1 ) ~= 1 then return end
