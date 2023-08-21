@@ -19,7 +19,6 @@ local function playerPickup( ply, ent )
     if not ULib.isSandbox() then return end
     if not ent:IsPlayer() then return end
     if ent.NoNoclip then return end
-    if ent.frozen then return end
     if ply:GetInfoNum( "cl_pickupplayers", 1 ) ~= 1 then return end
 
     local access, tag = ULib.ucl.query( ply, "ulx physgunplayer" )
@@ -36,6 +35,12 @@ local function playerPickup( ply, ent )
     if CLIENT then return true end
 
     ply.cfCIsHoldingPlayer = ent
+
+    if ent:IsFrozen() then
+        local freezeAccess = ULib.ucl.query( ply, "ulx freeze" )
+        if not freezeAccess then return end
+        ply:ConCommand( "ulx unfreeze " .. ent:GetName() )
+    end
 
     ent:SetMoveType( MOVETYPE_NONE )
 
@@ -132,23 +137,10 @@ hook.Add( "KeyPress", "ulxPlayerPickupFreeze", function(ply, key )
     if ply:GetInfoNum( "cl_physgunfreezeplayers", 1 ) ~= 1 then return end
 
     local heldPlayer = ply.cfCIsHoldingPlayer
+    if not heldPlayer then return end
 
-    if heldPlayer then
-        local access = ULib.ucl.query( ply, "ulx freeze" )
-        if not access then return end
+    local access = ULib.ucl.query( ply, "ulx freeze" )
+    if not access then return end
 
-        ply:ConCommand( "ulx freeze " .. heldPlayer:GetName() )
-    else
-        local trace = ply:GetEyeTrace()
-        local ent = trace.Entity
-
-        if not IsValid( ent ) then return end
-        if not ent.frozen then return end
-        if not ent:IsPlayer() then return end
-
-        local access = ULib.ucl.query( ply, "ulx freeze" )
-        if not access then return end
-
-        ply:ConCommand( "ulx unfreeze " .. ent:GetName() )
-    end
+    ply:ConCommand( "ulx freeze " .. heldPlayer:GetName() )
 end )
