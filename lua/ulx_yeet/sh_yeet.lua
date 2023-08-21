@@ -95,6 +95,7 @@ local function playerDrop( ply, ent )
 
     timer.Simple( 0, function()
         if not IsValid( ent ) then return end
+        if ent:IsFrozen() then return end
 
         ulx.ragdollPlayer( ent )
 
