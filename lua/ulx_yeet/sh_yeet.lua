@@ -39,7 +39,11 @@ local function playerPickup( ply, ent )
     if ent:IsFrozen() then
         local freezeAccess = ULib.ucl.query( ply, "ulx freeze" )
         if not freezeAccess then return end
-        ply:ConCommand( "ulx unfreeze " .. ent:GetName() )
+        if ply:IsBot() then
+            ply:ConCommand( "ulx unfreeze " .. ent:GetName() )
+        else
+            ply:ConCommand( "ulx unfreeze $" .. ent:SteamID() )
+        end
     end
 
     ent:SetMoveType( MOVETYPE_NONE )
