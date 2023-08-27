@@ -84,7 +84,7 @@ local function playerDrop( ply, ent )
 
     hook.Remove( "Tick", "CFC_Yeet_TickHolding_" .. ent:SteamID64() )
 
-    local newVelocity = ent.cfcYeetSpeed
+    local newVelocity = ent.cfcYeetSpeed or 0
     ent:SetMoveType( MOVETYPE_WALK )
     ent:SetVelocity( newVelocity * 50 )
 
