@@ -147,5 +147,9 @@ hook.Add( "KeyPress", "ulxPlayerPickupFreeze", function( ply, key )
     local access = ULib.ucl.query( ply, "ulx freeze" )
     if not access then return end
 
-    ply:ConCommand( "ulx freeze " .. heldPlayer:GetName() )
+    if heldPlayer:IsBot() then
+        ply:ConCommand( "ulx unfreeze " .. heldPlayer:GetName() )
+    else
+        ply:ConCommand( "ulx unfreeze $" .. heldPlayer:SteamID() )
+    end
 end )
