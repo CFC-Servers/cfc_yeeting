@@ -1,7 +1,8 @@
 local IN_ATTACK2 = IN_ATTACK2
 
-local ragdollVelocity = CreateConVar( "ulx_physgun_ragdoll_velocity", 40, { FCVAR_REPLICATED, FCVAR_ARCHIVE }, "The velocity required for a physgunned player to turn into a ragdoll on release.", 0 ):GetInt()
-local unragdollVelocity = 0.5 --Increasing this will make players unragdoll too early or create a very fast 
+local ragdollVelocity = CreateConVar( "ulx_physgun_ragdoll_velocity", 40, { FCVAR_REPLICATED, FCVAR_ARCHIVE }, "The velocity required for a physgunned player to turn into a ragdoll on release.", 0 )
+    :GetInt()
+local unragdollVelocity = 0.5 --Increasing this will make players unragdoll too early or create a very fast
 cvars.AddChangeCallback( "ulx_physgun_ragdoll_velocity", function( _, _, val )
     ragdollVelocity = tonumber( val )
 end )
@@ -34,7 +35,7 @@ local function playerPickup( ply, ent )
 
     if CLIENT then return true end
 
-    ply.cfCIsHoldingPlayer = ent
+    ply.cfcIsHoldingPlayer = ent
 
     if ent:IsFrozen() then
         local freezeAccess = ULib.ucl.query( ply, "ulx freeze" )
@@ -80,7 +81,7 @@ if CLIENT then return end
 local function playerDrop( ply, ent )
     if not ent:IsPlayer() then return end
 
-    ply.cfCIsHoldingPlayer = nil
+    ply.cfcIsHoldingPlayer = nil
 
     hook.Remove( "Tick", "CFC_Yeet_TickHolding_" .. ent:SteamID64() )
 
@@ -141,15 +142,15 @@ hook.Add( "KeyPress", "ulxPlayerPickupFreeze", function( ply, key )
     if ply:GetWeapon( "weapon_physgun" ) ~= ply:GetActiveWeapon() then return end
     if ply:GetInfoNum( "cl_physgunfreezeplayers", 1 ) ~= 1 then return end
 
-    local heldPlayer = ply.cfCIsHoldingPlayer
+    local heldPlayer = ply.cfcIsHoldingPlayer
     if not heldPlayer then return end
 
     local access = ULib.ucl.query( ply, "ulx freeze" )
     if not access then return end
 
     if heldPlayer:IsBot() then
-        ply:ConCommand( "ulx unfreeze " .. heldPlayer:GetName() )
+        ply:ConCommand( "ulx freeze " .. heldPlayer:GetName() )
     else
-        ply:ConCommand( "ulx unfreeze $" .. heldPlayer:SteamID() )
+        ply:ConCommand( "ulx freeze $" .. heldPlayer:SteamID() )
     end
 end )
