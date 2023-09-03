@@ -29,7 +29,7 @@ local function playerPickup( ply, ent )
 
     ULib.cmds.PlayerArg.processRestrictions( restrictions, ply, {}, tag and ULib.splitArgs( tag )[1] )
 
-    if restrictions.restrictedTargets == false or (restrictions.restrictedTargets and not table.HasValue( restrictions.restrictedTargets, ent )) then
+    if restrictions.restrictedTargets == false or ( restrictions.restrictedTargets and not table.HasValue( restrictions.restrictedTargets, ent ) ) then
         return
     end
 
