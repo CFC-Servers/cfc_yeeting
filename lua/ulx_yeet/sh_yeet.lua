@@ -80,12 +80,13 @@ if CLIENT then return end
 
 local function playerDrop( ply, ent )
     if not ent:IsPlayer() then return end
+    if not ply.cfcIsHoldingPlayer then return end
 
     ply.cfcIsHoldingPlayer = nil
 
     hook.Remove( "Tick", "CFC_Yeet_TickHolding_" .. ent:SteamID64() )
 
-    local newVelocity = ent.cfcYeetSpeed or 0
+    local newVelocity = ent.cfcYeetSpeed or Vector( 0, 0, 0 )
     ent:SetMoveType( MOVETYPE_WALK )
     ent:SetVelocity( newVelocity * 50 )
 
